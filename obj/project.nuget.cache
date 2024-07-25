@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "sqS7WjVLYBh4NhIZyLpewN+8SE1SWJEhu62jv7sW6JK/WQ3H/+pNoAbNRZZfGz/VHkJYHHGOaktnZNF6TNO76Q==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Лисёнок\\Documents\\CellularAutomaton\\CellularAutomaton.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Лисёнок\\.nuget\\packages\\microsoft.netcore.app.ref\\7.0.18\\microsoft.netcore.app.ref.7.0.18.nupkg.sha512",
+    "C:\\Users\\Лисёнок\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\7.0.18\\microsoft.windowsdesktop.app.ref.7.0.18.nupkg.sha512",
+    "C:\\Users\\Лисёнок\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\7.0.18\\microsoft.aspnetcore.app.ref.7.0.18.nupkg.sha512",
+    "C:\\Users\\Лисёнок\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\7.0.18\\microsoft.netcore.app.host.win-x64.7.0.18.nupkg.sha512"
+  ],
+  "logs": []
+}
