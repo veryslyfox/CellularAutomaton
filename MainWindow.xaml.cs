@@ -16,25 +16,62 @@ public partial class MainWindow : Window
     private readonly WriteableBitmap _bitmap;
     private readonly Random _rng = new();
     private int _f;
-    private bool[,] _field = new bool[1000, 1000];
+    private bool[,] _bField = new bool[1000, 1000];
+    private int[,] _iField = new int[1000, 1000];
+    private FieldType _fieldType;
+    private Color[] _colors;
     public MainWindow()
     {
         InitializeComponent();
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
-        var p = 0.1;
-        for (int y = 0; y < 1000; y++)
+        _fieldType = FieldType.Bool;
+        var p = 0.04;
+        var countOfColors = 4;
+        switch (_fieldType)
         {
-            for (int x = 0; x < 1000; x++)
-            {
-                _field[x, y] = _rng.NextDouble() < p;
-            }
+            case FieldType.Bool:
+                for (int y = 0; y < 1000; y++)
+                {
+                    for (int x = 0; x < 1000; x++)
+                    {
+                        _bField[x, y] = _rng.NextDouble() < p;
+                    }
+                }
+                break;
+            case FieldType.Int:
+                for (int y = 0; y < 1000; y++)
+                {
+                    for (int x = 0; x < 1000; x++)
+                    {
+                        _iField[x, y] = _rng.Next(countOfColors);
+                    }
+                }
+                break;
         }
+        _colors = new Color[] { FromRgb(0, 0, 0), FromRgb(255, 255, 255) };
+
         _timer.Interval = TimeSpan.FromSeconds(0.00001);
         _timer.Tick += Tick;
         _timer.Start();
     }
+    public string[] Tokenize(string str)
+    {
+        for (int i = 0; i < str.Length; i++)
+        {
+            if (str[i] == '/')
+            {
 
+            }
+        }
+    }
+    public void Next(Rule rule, int startX, int endX, int startY, int endY)
+    {
+        if (rule is LLRule llRule)
+        {
+            NextLL(startX, endX, startY, endY, llRule.Birth, llRule.Survival);
+        }
+    }
     private Point Interpolate(Point a, Point b, double t)
     {
         return new(a.X * t + b.X * (1 - t), a.Y * t + b.Y * (1 - t));
@@ -46,14 +83,13 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next();
+        NextLL(1, 999, 1, 999, 264, 511);
         _bitmap.Lock();
         for (int y = 0; y < _bitmap.PixelHeight; y++)
         {
             for (int x = 0; x < _bitmap.PixelWidth; x++)
             {
-                var c = _field[x / 4, y / 4] ? 255 : 0;
-                var color = FromRgb(c, c, c);
+                var color = _colors[_bField[x, y] ? 1 : 0];
                 var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
                 unsafe
                 {
@@ -111,29 +147,33 @@ public partial class MainWindow : Window
         return Color.FromRgb((byte)(r * normalizer), ((byte)(g * normalizer)), ((byte)(b * normalizer)));
 
     }
-    public void Next()
+    // public void Next(object field, Rule rule)
+    // {
+    //     if(field )
+    // } 
+    public void NextLL(int startX, int endX, int startY, int endY, short birth, short survival)
     {
-        var newField = new bool[1000, 1000];
         int F(int x, int y)
         {
-            return _field[x, y] ? 1 : 0;
+            return _bField[x, y] ? 1 : 0;
         }
-        for (int x = 1; x < 999; x++)
+        var newField = new bool[1000, 1000];
+        for (int x = startX + 1; x < endX - 1; x++)
         {
-            for (int y = 1; y < 999; y++)
+            for (int y = startY + 1; y < endY - 1; y++)
             {
-                var c = F(x - 1, y - 1) + F(x, y - 1) * 2 + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
-                if(_field[x, y] & (c == 2) | (c == 3))
+                //var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
+                var c = F(x + 1, y + 2) + F(x + 2, y + 1) + F(x + 1, y - 2) + F(x - 2, y + 1) + F(x - 1, y + 2) + F(x + 2, y - 1) + F(x - 1, y - 2) + F(x - 2, y - 1);
+                if (_bField[x, y] & ((survival >> c) % 2 == 1))
                 {
                     newField[x, y] = true;
-                    continue;
                 }
-                if(c == 3)
+                else if ((birth >> c) % 2 == 1)
                 {
                     newField[x, y] = true;
                 }
             }
         }
-        _field = newField;
+        _bField = newField;
     }
 }

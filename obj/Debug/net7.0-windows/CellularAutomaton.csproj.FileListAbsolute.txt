@@ -18,3 +18,4 @@ C:\Users\Лисёнок\Documents\CellularAutomaton\obj\Debug\net7.0-windows\ref
 C:\Users\Лисёнок\Documents\CellularAutomaton\obj\Debug\net7.0-windows\CellularAutomaton.pdb
 C:\Users\Лисёнок\Documents\CellularAutomaton\obj\Debug\net7.0-windows\CellularAutomaton.genruntimeconfig.cache
 C:\Users\Лисёнок\Documents\CellularAutomaton\obj\Debug\net7.0-windows\ref\CellularAutomaton.dll
+C:\Users\Лисёнок\Documents\CellularAutomaton\obj\Debug\net7.0-windows\CellularAutomaton.sourcelink.json
