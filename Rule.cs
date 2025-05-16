@@ -1,12 +1,12 @@
-public abstract class Rule { }
-class LLRule : Rule
+global using System.Collections;
+public class Rule
 {
-    public LLRule(short birth, short survival)
+    public Rule(BitArray birth, BitArray survival)
     {
         Birth = birth;
         Survival = survival;
     }
 
-    public short Birth { get; }
-    public short Survival { get; }
+    public BitArray Birth { get; set; }
+    public BitArray Survival { get; set; }
 }

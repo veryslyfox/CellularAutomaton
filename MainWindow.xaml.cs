@@ -26,7 +26,7 @@ public partial class MainWindow : Window
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
         _fieldType = FieldType.Bool;
-        var p = 0.04;
+        var p = 0.1;
         var countOfColors = 4;
         switch (_fieldType)
         {
@@ -49,28 +49,15 @@ public partial class MainWindow : Window
                 }
                 break;
         }
-        _colors = new Color[] { FromRgb(0, 0, 0), FromRgb(255, 255, 255) };
+        _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0) };
 
         _timer.Interval = TimeSpan.FromSeconds(0.00001);
         _timer.Tick += Tick;
         _timer.Start();
     }
-    public string[] Tokenize(string str)
-    {
-        for (int i = 0; i < str.Length; i++)
-        {
-            if (str[i] == '/')
-            {
-
-            }
-        }
-    }
     public void Next(Rule rule, int startX, int endX, int startY, int endY)
     {
-        if (rule is LLRule llRule)
-        {
-            NextLL(startX, endX, startY, endY, llRule.Birth, llRule.Survival);
-        }
+        NextLL(startX, endX, startY, endY, rule.Birth, rule.Survival);
     }
     private Point Interpolate(Point a, Point b, double t)
     {
@@ -83,13 +70,13 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        NextLL(1, 999, 1, 999, 264, 511);
+        Next(Parser.Parse("B36/S23"), 0, 500, 0, 500);
         _bitmap.Lock();
         for (int y = 0; y < _bitmap.PixelHeight; y++)
         {
             for (int x = 0; x < _bitmap.PixelWidth; x++)
             {
-                var color = _colors[_bField[x, y] ? 1 : 0];
+                var color = _colors[_bField[x / 2, y / 2] ? 1 : 0];
                 var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
                 unsafe
                 {
@@ -151,7 +138,7 @@ public partial class MainWindow : Window
     // {
     //     if(field )
     // } 
-    public void NextLL(int startX, int endX, int startY, int endY, short birth, short survival)
+    public void NextLL(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival)
     {
         int F(int x, int y)
         {
@@ -162,13 +149,12 @@ public partial class MainWindow : Window
         {
             for (int y = startY + 1; y < endY - 1; y++)
             {
-                //var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
-                var c = F(x + 1, y + 2) + F(x + 2, y + 1) + F(x + 1, y - 2) + F(x - 2, y + 1) + F(x - 1, y + 2) + F(x + 2, y - 1) + F(x - 1, y - 2) + F(x - 2, y - 1);
-                if (_bField[x, y] & ((survival >> c) % 2 == 1))
+                var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
+                if (_bField[x, y] & survival[c])
                 {
                     newField[x, y] = true;
                 }
-                else if ((birth >> c) % 2 == 1)
+                else if (birth[c])
                 {
                     newField[x, y] = true;
                 }
