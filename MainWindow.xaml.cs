@@ -25,7 +25,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
-        _fieldType = FieldType.Bool;
+        _fieldType = FieldType.Int;
         var p = 0.1;
         var countOfColors = 4;
         switch (_fieldType)
@@ -55,9 +55,9 @@ public partial class MainWindow : Window
         _timer.Tick += Tick;
         _timer.Start();
     }
-    public void Next(Rule rule, int startX, int endX, int startY, int endY)
+    public void Next(Rule rule, int startX, int endX, int startY, int endY, int generations)
     {
-        NextLL(startX, endX, startY, endY, rule.Birth, rule.Survival);
+        NextLL(startX, endX, startY, endY, rule.Birth, rule.Survival, generations);
     }
     private Point Interpolate(Point a, Point b, double t)
     {
@@ -70,13 +70,13 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next(Parser.Parse("B36/S23"), 0, 500, 0, 500);
+        Next(Parser.Parse("B2/S"), 0, 1000, 0, 1000, 5);
         _bitmap.Lock();
         for (int y = 0; y < _bitmap.PixelHeight; y++)
         {
             for (int x = 0; x < _bitmap.PixelWidth; x++)
             {
-                var color = _colors[_bField[x / 2, y / 2] ? 1 : 0];
+                var color = _colors[_iField[x, y] > 0 ? 1 : 0];
                 var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
                 unsafe
                 {
@@ -161,5 +161,44 @@ public partial class MainWindow : Window
             }
         }
         _bField = newField;
+    }
+    public void NextLL(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival, int generations)
+    {
+        int F(int x, int y)
+        {
+            return _iField[x, y] == 1 ? 1 : 0;
+        }
+        var newField = new int[1000, 1000];
+        for (int x = startX + 1; x < endX - 1; x++)
+        {
+            for (int y = startY + 1; y < endY - 1; y++)
+            {
+                var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
+                if (survival[c] & _iField[x, y] == 1)
+                {
+                    newField[x, y] = 1;
+                }
+                else
+                {
+                    if (birth[c])
+                    {
+                        newField[x, y] = 1;
+                    }
+                }
+                if (_iField[x, y] > 1)
+                {
+                    _iField[x, y]++;
+                }
+                if (!survival[c] & _iField[x, y] == 1)
+                {
+                    _iField[x, y] = 2;
+                }
+                if (_iField[x, y] == generations)
+                {
+                    _iField[x, y] = 0;
+                }
+            }
+        }
+        _iField = newField;
     }
 }
