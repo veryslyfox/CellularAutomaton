@@ -5,11 +5,20 @@ static class Parser
     public static Rule Parse(string str)
     {
         var rule = new Rule(new BitArray(10), new BitArray(10));
-        foreach (var token in Tokenize(str))
+        foreach (var token in StringsToTokens(str.Split('/')))
         {
             LoadToken(token, ref rule);
         }
         return rule;
+    }
+    public static Token[] StringsToTokens(string[] input)
+    {
+        var result = new Token[input.Length];
+        for (int i = 0; i < result.Length; i++)
+        {
+            result[i] = new Token(input[i], GetTokenType(input[i]));
+        }
+        return result;
     }
     public static List<Token> Tokenize(string str)
     {

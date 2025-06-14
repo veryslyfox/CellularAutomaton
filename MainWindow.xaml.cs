@@ -27,7 +27,7 @@ public partial class MainWindow : Window
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
         _fieldType = FieldType.Bool;
-        var p = 0.2;
+        var p = 0.1;
         var countOfColors = 4;
         _error = Test.Run();
         switch (_fieldType)
@@ -72,7 +72,7 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next(Parser.Parse("B3/S23"), 0, 500, 0, 500);
+        Next(Parser.Parse("B45678/S5678"), 0, 500, 0, 500);
         _bitmap.Lock();
         for (int y = 0; y < _bitmap.PixelHeight; y++)
         {
@@ -153,7 +153,7 @@ public partial class MainWindow : Window
                 {
                     newField[x, y] = true;
                 }
-                else if (birth[c])
+                if (!_bField[x, y] & birth[c])
                 {
                     newField[x, y] = true;
                 }
