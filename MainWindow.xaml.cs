@@ -26,9 +26,9 @@ public partial class MainWindow : Window
         InitializeComponent();
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
-        _fieldType = FieldType.Bool;
-        var p = 0.1;
-        var countOfColors = 4;
+        _fieldType = FieldType.Int;
+        var p = 0.01;
+        var countOfColors = 2;
         _error = Test.Run();
         switch (_fieldType)
         {
@@ -46,12 +46,13 @@ public partial class MainWindow : Window
                 {
                     for (int x = 0; x < 1000; x++)
                     {
-                        _iField[x, y] = _rng.Next(countOfColors);
+                        //_iField[x, y] = _rng.Next(countOfColors);
+                        _iField[x, y] = _rng.NextDouble() < p ? 1 : 0;
                     }
                 }
                 break;
         }
-        _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0) };
+        _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(110, 110, 110) };
 
         _timer.Interval = TimeSpan.FromSeconds(0.00001);
         _timer.Tick += Tick;
@@ -60,6 +61,10 @@ public partial class MainWindow : Window
     public void Next(Rule rule, int startX, int endX, int startY, int endY)
     {
         NextLL(startX, endX, startY, endY, rule.Birth, rule.Survival);
+    }
+    public void Next(Rule rule, int startX, int endX, int startY, int endY, int generations)
+    {
+        NextLL(startX, endX, startY, endY, rule.Birth, rule.Survival, generations);
     }
     private Point Interpolate(Point a, Point b, double t)
     {
@@ -72,13 +77,13 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next(Parser.Parse("B45678/S5678"), 0, 500, 0, 500);
+        Next(Parser.Parse("B2/S345"), 0, 500, 0, 500, 2);
         _bitmap.Lock();
         for (int y = 0; y < _bitmap.PixelHeight; y++)
         {
             for (int x = 0; x < _bitmap.PixelWidth; x++)
             {
-                var color = _colors[_bField[x / 2, y / 2] ? 1 : 0];
+                var color = _colors[_iField[x / 2, y / 2]];
                 var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
                 unsafe
                 {
@@ -141,7 +146,7 @@ public partial class MainWindow : Window
     {
         int F(int x, int y)
         {
-            return _bField[(x + endX - startX) % (endX - startX), (y + endY - startY) % (endY - startY)] ? 1 : 0;
+            return _bField[x, y] ? 1 : 0;
         }
         var newField = new bool[1000, 1000];
         for (int x = startX + 1; x < endX; x++)
@@ -168,33 +173,29 @@ public partial class MainWindow : Window
             return _iField[x, y] == 1 ? 1 : 0;
         }
         var newField = new int[1000, 1000];
-        for (int x = startX + 1; x < endX - 1; x++)
+        for (int x = startX + 1; x < endX; x++)
         {
-            for (int y = startY + 1; y < endY - 1; y++)
+            for (int y = startY + 1; y < endY; y++)
             {
                 var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
-                if (survival[c] & _iField[x, y] == 1)
+                if ((_iField[x, y] > generations) | ((_iField[x, y] == 0 & !birth[c])))
+                {
+                    newField[x, y] = 0;
+                    continue;
+                }
+                if ((birth[c] & _iField[x, y] == 0) | (survival[c] & _iField[x, y] == 1))
                 {
                     newField[x, y] = 1;
+                    continue;
                 }
-                else
+                if (!survival[c] & _iField[x, y] == 1)
                 {
-                    if (birth[c])
-                    {
-                        newField[x, y] = 1;
-                    }
+                    newField[x, y] = 2;
+                    continue;
                 }
                 if (_iField[x, y] > 1)
                 {
                     _iField[x, y]++;
-                }
-                if (!survival[c] & _iField[x, y] == 1)
-                {
-                    _iField[x, y] = 2;
-                }
-                if (_iField[x, y] == generations)
-                {
-                    _iField[x, y] = 0;
                 }
             }
         }
