@@ -27,7 +27,7 @@ public partial class MainWindow : Window
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
         _fieldType = FieldType.Int;
-        var p = 0.01;
+        var p = 0.1;
         var countOfColors = 2;
         _error = Test.Run();
         switch (_fieldType)
@@ -52,8 +52,7 @@ public partial class MainWindow : Window
                 }
                 break;
         }
-        _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(110, 110, 110) };
-
+        _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(0, 0, 220) };
         _timer.Interval = TimeSpan.FromSeconds(0.00001);
         _timer.Tick += Tick;
         _timer.Start();
@@ -77,7 +76,7 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next(Parser.Parse("B2/S345"), 0, 500, 0, 500, 2);
+        Next(Parser.Parse("B2/S"), 0, 500, 0, 500, 2);
         _bitmap.Lock();
         for (int y = 0; y < _bitmap.PixelHeight; y++)
         {
@@ -200,5 +199,9 @@ public partial class MainWindow : Window
             }
         }
         _iField = newField;
+    }
+    public void NextCyclic(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival, int generations)
+    {
+
     }
 }
