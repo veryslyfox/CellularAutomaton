@@ -27,24 +27,24 @@ public partial class MainWindow : Window
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
         _fieldType = FieldType.Int;
-        var p = 0.1;
+        var p = 0.2;
         var countOfColors = 2;
         _error = Test.Run();
         switch (_fieldType)
         {
             case FieldType.Bool:
-                for (int y = 0; y < 1000; y++)
+                for (int y = 225; y < 275; y++)
                 {
-                    for (int x = 0; x < 1000; x++)
+                    for (int x = 225; x < 275; x++)
                     {
                         _bField[x, y] = _rng.NextDouble() < p;
                     }
                 }
                 break;
             case FieldType.Int:
-                for (int y = 0; y < 1000; y++)
+                for (int y = 225; y < 275; y++)
                 {
-                    for (int x = 0; x < 1000; x++)
+                    for (int x = 225; x < 275; x++)
                     {
                         //_iField[x, y] = _rng.Next(countOfColors);
                         _iField[x, y] = _rng.NextDouble() < p ? 1 : 0;
@@ -76,13 +76,13 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next(Parser.Parse("B2/S"), 0, 500, 0, 500, 2);
+        Next(Parser.Parse("B2/S"), 0, 500, 0, 500, 25);
         _bitmap.Lock();
         for (int y = 0; y < _bitmap.PixelHeight; y++)
         {
             for (int x = 0; x < _bitmap.PixelWidth; x++)
             {
-                var color = _colors[_iField[x / 2, y / 2]];
+                var color = _colors[_iField[x / 2, y / 2]];// > 0 ? 1 : 0
                 var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
                 unsafe
                 {
@@ -172,9 +172,9 @@ public partial class MainWindow : Window
             return _iField[x, y] == 1 ? 1 : 0;
         }
         var newField = new int[1000, 1000];
-        for (int x = startX + 1; x < endX; x++)
+        for (int x = startX + 1; x < endX - 1; x++)
         {
-            for (int y = startY + 1; y < endY; y++)
+            for (int y = startY + 1; y < endY - 1; y++)
             {
                 var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
                 if ((_iField[x, y] > generations) | ((_iField[x, y] == 0 & !birth[c])))

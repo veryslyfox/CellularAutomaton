@@ -11,32 +11,13 @@ static class Parser
         }
         return rule;
     }
-    public static Token[] StringsToTokens(string[] input)
+    static Token[] StringsToTokens(string[] input)
     {
         var result = new Token[input.Length];
         for (int i = 0; i < result.Length; i++)
         {
             result[i] = new Token(input[i], GetTokenType(input[i]));
         }
-        return result;
-    }
-    public static List<Token> Tokenize(string str)
-    {
-        var result = new List<Token>();
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < str.Length; i++)
-        {
-            if (str[i] == '/')
-            {
-                var token = builder.ToString();
-                result.Add(new Token(token, GetTokenType(token)));
-                builder = new StringBuilder();
-                i++;
-            }
-            builder.Append(str[i]);
-        }
-        var lastToken = builder.ToString();
-        result.Add(new Token(lastToken, GetTokenType(lastToken)));
         return result;
     }
     public static TokenType GetTokenType(string token)
@@ -47,11 +28,26 @@ static class Parser
                 return TokenType.Birth;
             case 'S':
                 return TokenType.Survival;
+            case 'p':
+            case 'd':
+                return TokenType.Density;
             default:
                 return TokenType.Unknown;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case 'G':
+                return TokenType.Generations;
         }
     }
-    public static void LoadToken(Token token, ref Rule rule)
+    static void LoadToken(Token token, ref Rule rule)
     {
         switch (token.Type)
         {
@@ -63,7 +59,7 @@ static class Parser
                 break;
         }
     }
-    public static BitArray GetValuesFromString(string str, bool ignoreFirstSymbol)
+    static BitArray GetValuesFromString(string str, bool ignoreFirstSymbol)
     {
         var result = new BitArray(10);
         foreach (var symbol in str)
@@ -121,9 +117,13 @@ class Token
     public string Content { get; }
     public TokenType Type { get; }
 }
-enum TokenType
+public enum TokenType
 {
     Unknown,
     Birth,
     Survival,
+    Generations,
+    Density,
+    DensityOf,
+    FieldScale
 }
