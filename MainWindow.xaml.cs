@@ -33,18 +33,18 @@ public partial class MainWindow : Window
         switch (_fieldType)
         {
             case FieldType.Bool:
-                for (int y = 225; y < 275; y++)
+                for (int y = 0; y < 500; y++)
                 {
-                    for (int x = 225; x < 275; x++)
+                    for (int x = 0; x < 500; x++)
                     {
                         _bField[x, y] = _rng.NextDouble() < p;
                     }
                 }
                 break;
             case FieldType.Int:
-                for (int y = 225; y < 275; y++)
+                for (int y = 0; y < 500; y++)
                 {
-                    for (int x = 225; x < 275; x++)
+                    for (int x = 0; x < 500; x++)
                     {
                         //_iField[x, y] = _rng.Next(countOfColors);
                         _iField[x, y] = _rng.NextDouble() < p ? 1 : 0;
@@ -76,7 +76,11 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next(Parser.Parse("B2/S"), 0, 500, 0, 500, 25);
+        for (int i = 0; i < 118; i++)
+        {
+            Next(Parser.Parse("B34/S23"), 0, 500, 0, 500, 2);
+        }
+        System.Threading.Thread.Sleep(500);
         _bitmap.Lock();
         for (int y = 0; y < _bitmap.PixelHeight; y++)
         {
@@ -152,7 +156,7 @@ public partial class MainWindow : Window
         {
             for (int y = startY + 1; y < endY; y++)
             {
-                var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
+                var c = F(x - 1, y - 1) + F(x, y - 1) * 2 + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
                 if (_bField[x, y] & survival[c])
                 {
                     newField[x, y] = true;
@@ -177,24 +181,24 @@ public partial class MainWindow : Window
             for (int y = startY + 1; y < endY - 1; y++)
             {
                 var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
-                if ((_iField[x, y] > generations) | ((_iField[x, y] == 0 & !birth[c])))
+                if ((_iField[x, y] >= generations) || ((_iField[x, y] == 0 && !birth[c])))
                 {
                     newField[x, y] = 0;
                     continue;
                 }
-                if ((birth[c] & _iField[x, y] == 0) | (survival[c] & _iField[x, y] == 1))
+                if ((birth[c] && _iField[x, y] == 0) || (survival[c] && _iField[x, y] == 1))
                 {
                     newField[x, y] = 1;
                     continue;
                 }
-                if (!survival[c] & _iField[x, y] == 1)
+                if (!survival[c] && _iField[x, y] == 1)
                 {
                     newField[x, y] = 2;
                     continue;
                 }
                 if (_iField[x, y] > 1)
                 {
-                    _iField[x, y]++;
+                    newField[x, y] = _iField[x, y] + 1;
                 }
             }
         }

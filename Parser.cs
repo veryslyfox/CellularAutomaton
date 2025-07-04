@@ -47,6 +47,7 @@ static class Parser
                 return TokenType.Generations;
         }
     }
+    
     static void LoadToken(Token token, ref Rule rule)
     {
         switch (token.Type)
