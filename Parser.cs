@@ -4,7 +4,7 @@ static class Parser
 {
     public static Rule Parse(string str)
     {
-        var rule = new Rule(new BitArray(10), new BitArray(10));
+        var rule = new Rule(new BitArray(10), new BitArray(10), 0, 1);
         foreach (var token in StringsToTokens(str.Split('/')))
         {
             LoadToken(token, ref rule);
@@ -47,7 +47,7 @@ static class Parser
                 return TokenType.Generations;
         }
     }
-    
+
     static void LoadToken(Token token, ref Rule rule)
     {
         switch (token.Type)
@@ -57,6 +57,26 @@ static class Parser
                 break;
             case TokenType.Survival:
                 rule.Survival = GetValuesFromString(token.Content, false);
+                break;
+            case TokenType.Density:
+                if (double.TryParse(token.Content.Trim("pd= ".ToCharArray()), out double d))
+                {
+                    rule.StartDensity = d;
+                }
+                else
+                {
+                    throw new IncorrectRulestringException($"Density is not a number: {token.Content.Trim("pd= ".ToCharArray())}");
+                }
+                break;
+            case TokenType.Generations:
+                if (int.TryParse(token.Content.Trim('G'), out int g))
+                {
+                    rule.Generations = g;
+                }
+                else
+                {
+                    throw new IncorrectRulestringException($"Generations count is not a number: {token.Content.Trim('G')}");
+                }
                 break;
         }
     }
