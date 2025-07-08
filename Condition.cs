@@ -1,6 +1,6 @@
 // class Condition
 // {
-//     public Condition(ConditionType type, BitArray? birthLL, BitArray? survivalLL, BitArray? thresholdLL, )
+//     public Condition(ConditionType type, BitArray? birthLL, BitArray? survivalLL, BitArray? thresholdLL,)
 //     {
 
 //     }

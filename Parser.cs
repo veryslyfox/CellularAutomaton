@@ -4,12 +4,19 @@ static class Parser
 {
     public static Rule Parse(string str)
     {
-        var rule = new Rule(new BitArray(10), new BitArray(10), 0, 1);
-        foreach (var token in StringsToTokens(str.Split('/')))
+        try
         {
-            LoadToken(token, ref rule);
+            var rule = new Rule(new BitArray(10), new BitArray(10), 0, 1);
+            foreach (var token in StringsToTokens(str.Split('/')))
+            {
+                LoadToken(token, ref rule);
+            }
+            return rule;
         }
-        return rule;
+        catch (Exception exception)
+        {
+            throw new IncorrectRulestringException(exception.Message, exception);
+        }
     }
     static Token[] StringsToTokens(string[] input)
     {

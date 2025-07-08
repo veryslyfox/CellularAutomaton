@@ -24,11 +24,11 @@ public partial class MainWindow : Window
     private Rule _rule;
     public MainWindow()
     {
-        _rule = Parser.Parse("B345678/S238/p=0,1/2");
+        _rule = Parser.Parse("B2//p=0,1/G2");
         InitializeComponent();
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
-        _fieldType = FieldType.Int;
+        _fieldType = _rule.Generations > 1 ? FieldType.Int : FieldType.Bool;
         var p = _rule.StartDensity;
         var countOfColors = 2;
         _error = Test.Run();
@@ -54,24 +54,28 @@ public partial class MainWindow : Window
                 }
                 break;
         }
-        _colors = new Color[_rule.Generations + 1];
-        for (int i = 0; i < _rule.Generations + 1; i++)
-        {
-            _colors[i] = FromRgb(255 - 8 * i, 255 - 8 * i, 255 - 8 * i);
-        }
-        _colors[0] = FromRgb(0, 0, 0);
-        //_colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(0, 0, 220) };
+        // _colors = new Color[_rule.Generations + 1];
+        // for (int i = 0; i < _rule.Generations + 1; i++)
+        // {
+        //     _colors[i] = FromRgb(255 - 8 * i, 255 - 8 * i, 255 - 8 * i);
+        // }
+        // _colors[0] = FromRgb(0, 0, 0);
+        _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(0, 0, 220) };
         _timer.Interval = TimeSpan.FromSeconds(0.00001);
         _timer.Tick += Tick;
         _timer.Start();
     }
+
     public void Next(Rule rule, int startX, int endX, int startY, int endY)
     {
-        NextLL(startX, endX, startY, endY, rule.Birth, rule.Survival);
-    }
-    public void Next(Rule rule, int startX, int endX, int startY, int endY, int generations)
-    {
-        NextLL(startX, endX, startY, endY, rule.Birth, rule.Survival, generations);
+        if (rule.Generations > 1)
+        {
+            NextLL(startX, endX, startY, endY, rule.Birth, rule.Survival, rule.Generations);
+        }
+        if (rule.Generations <= 1)
+        {
+            NextLL(startX, endX, startY, endY, rule.Birth, rule.Survival);
+        }
     }
     private Point Interpolate(Point a, Point b, double t)
     {
@@ -84,17 +88,35 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next(_rule, 0, 500, 0, 500, _rule.Generations);
+        Next(_rule, 0, 500, 0, 500);
         _bitmap.Lock();
-        for (int y = 0; y < _bitmap.PixelHeight; y++)
+        if (_fieldType == FieldType.Bool)
         {
-            for (int x = 0; x < _bitmap.PixelWidth; x++)
+            for (int y = 0; y < _bitmap.PixelHeight; y++)
             {
-                var color = _colors[_iField[x / 2, y / 2]];
-                var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
-                unsafe
+                for (int x = 0; x < _bitmap.PixelWidth; x++)
                 {
-                    *((int*)ptr) = (color.R << 16) | (color.G << 8) | (color.B);
+                    var color = _colors[_bField[x / 2, y / 2] ? 1 : 0];
+                    var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
+                    unsafe
+                    {
+                        *((int*)ptr) = (color.R << 16) | (color.G << 8) | (color.B);
+                    }
+                }
+            }
+        }
+        if (_fieldType == FieldType.Int)
+        {
+            for (int y = 0; y < _bitmap.PixelHeight; y++)
+            {
+                for (int x = 0; x < _bitmap.PixelWidth; x++)
+                {
+                    var color = _colors[_iField[x / 2, y / 2]];
+                    var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
+                    unsafe
+                    {
+                        *((int*)ptr) = (color.R << 16) | (color.G << 8) | (color.B);
+                    }
                 }
             }
         }
@@ -160,7 +182,7 @@ public partial class MainWindow : Window
         {
             for (int y = startY + 1; y < endY - 1; y++)
             {
-                var c = F(x - 1, y - 1) + F(x, y - 1) * 2 + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
+                var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
                 if (_bField[x, y] & survival[c])
                 {
                     newField[x, y] = true;
