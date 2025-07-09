@@ -24,7 +24,7 @@ public partial class MainWindow : Window
     private Rule _rule;
     public MainWindow()
     {
-        _rule = Parser.Parse("B2//p=0,1/G2");
+        _rule = Parser.Parse("B14/S/p=0/G") ?? Parser.Parse("B3/S23/p=0,1")!;
         InitializeComponent();
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
@@ -54,13 +54,13 @@ public partial class MainWindow : Window
                 }
                 break;
         }
-        // _colors = new Color[_rule.Generations + 1];
-        // for (int i = 0; i < _rule.Generations + 1; i++)
-        // {
-        //     _colors[i] = FromRgb(255 - 8 * i, 255 - 8 * i, 255 - 8 * i);
-        // }
-        // _colors[0] = FromRgb(0, 0, 0);
-        _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(0, 0, 220) };
+        _colors = new Color[_rule.Generations + 1];
+        _iField[250, 250] = 1;
+        for (int i = 0; i < _rule.Generations + 1; i++)
+        {
+            _colors[i] = FromRgb(255 - i, 255 - i, 255 - i);
+        }
+        _colors[0] = FromRgb(0, 0, 0);
         _timer.Interval = TimeSpan.FromSeconds(0.00001);
         _timer.Tick += Tick;
         _timer.Start();
@@ -178,9 +178,9 @@ public partial class MainWindow : Window
             return _bField[x, y] ? 1 : 0;
         }
         var newField = new bool[1000, 1000];
-        for (int x = startX + 1; x < endX - 1; x++)
+        for (int y = startY + 1; y < endY - 1; y++)
         {
-            for (int y = startY + 1; y < endY - 1; y++)
+            for (int x = startX + 1; x < endX - 1; x++)
             {
                 var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
                 if (_bField[x, y] & survival[c])
@@ -196,6 +196,55 @@ public partial class MainWindow : Window
         _bField = newField;
     }
     public void NextLL(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival, int generations)
+    {
+        int F(int x, int y)
+        {
+            return _iField[x, y] == 1 ? 1 : 0;
+        }
+        var newField = new int[1000, 1000];
+        for (int y = startY + 1; y < endY - 1; y++)
+        {
+            for (int x = startX + 1; x < endX - 1; x++)
+            {
+                var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
+                if ((_iField[x, y] >= generations) || ((_iField[x, y] == 0 && !birth[c])))
+                {
+                    newField[x, y] = 0;
+                    continue;
+                }
+                if ((birth[c] && _iField[x, y] == 0) || (survival[c] && _iField[x, y] == 1))
+                {
+                    newField[x, y] = 1;
+                    continue;
+                }
+                if (!survival[c] && _iField[x, y] == 1)
+                {
+                    newField[x, y] = 2;
+                    continue;
+                }
+                if (_iField[x, y] > 1)
+                {
+                    newField[x, y] = _iField[x, y] + 1;
+                }
+            }
+        }
+        _iField = newField;
+    }
+    public void NextLLR(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival, int radius = 1)
+    {
+        int F(int x, int y)
+        {
+            return _bField[x, y] ? 1 : 0;
+        }
+        var newField = new bool[1000, 1000];
+        var horizontalSum = new bool[1000 - radius, 1000];
+        for (int y = 0; y < 1000 - radius; y++)
+        {
+
+        }
+        _bField = newField;
+    }
+    public void NextLLR(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival, int generations, int radius = 1)
     {
         int F(int x, int y)
         {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 static class Parser
 {
-    public static Rule Parse(string str)
+    public static Rule? Parse(string str)
     {
         try
         {
@@ -15,7 +15,7 @@ static class Parser
         }
         catch (Exception exception)
         {
-            throw new IncorrectRulestringException(exception.Message, exception);
+            return null;
         }
     }
     static Token[] StringsToTokens(string[] input)
