@@ -6,3 +6,5 @@ B345678/S238/2 Replicators
 (Note: Replicator have period equal to 52 and isn't clean)
 (B345678/S23/2 doesn't have a replicator but has an orthogonal spaceship)
 B34/S23/2 Only seen natural oscillator is p118 (mod: 59), an extremely large period
+B345678/S234678/3
+B3678/S2367/2 With an interesting p14 oscillator and still life formations

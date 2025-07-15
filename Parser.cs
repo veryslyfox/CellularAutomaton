@@ -13,7 +13,7 @@ static class Parser
             }
             return rule;
         }
-        catch (Exception exception)
+        catch
         {
             return null;
         }

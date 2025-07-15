@@ -24,13 +24,12 @@ public partial class MainWindow : Window
     private Rule _rule;
     public MainWindow()
     {
-        _rule = Parser.Parse("B14/S/p=0/G") ?? Parser.Parse("B3/S23/p=0,1")!;
+        _rule = Parser.Parse("B2/S0345/10/p=0") ?? Parser.Parse("B3/S23/p=0,1")!;
         InitializeComponent();
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
         _fieldType = _rule.Generations > 1 ? FieldType.Int : FieldType.Bool;
         var p = _rule.StartDensity;
-        var countOfColors = 2;
         _error = Test.Run();
         switch (_fieldType)
         {
@@ -44,23 +43,27 @@ public partial class MainWindow : Window
                 }
                 break;
             case FieldType.Int:
-                for (int y = 0; y < 500; y++)
+                for (int y = 0; y < 1000; y++)
                 {
-                    for (int x = 0; x < 500; x++)
+                    for (int x = 0; x < 1000; x++)
                     {
-                        //_iField[x, y] = _rng.Next(countOfColors);
+                        // _iField[x, y] = _rng.Next(3);
                         _iField[x, y] = _rng.NextDouble() < p ? 1 : 0;
                     }
                 }
                 break;
         }
         _colors = new Color[_rule.Generations + 1];
-        _iField[250, 250] = 1;
         for (int i = 0; i < _rule.Generations + 1; i++)
         {
-            _colors[i] = FromRgb(255 - i, 255 - i, 255 - i);
+            _colors[i] = FromRgb(0, 0, 0);
         }
-        _colors[0] = FromRgb(0, 0, 0);
+        // _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(0, 0, 220) };
+        _iField[499, 499] = 1;
+        _iField[499, 500] = 1;
+        _iField[500, 499] = 1;
+        _iField[500, 500] = 1;
+        _colors[0] = FromRgb(220, 220, 220);
         _timer.Interval = TimeSpan.FromSeconds(0.00001);
         _timer.Tick += Tick;
         _timer.Start();
@@ -88,7 +91,7 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next(_rule, 0, 500, 0, 500);
+        Next(_rule, 0, 1000, 0, 1000);
         _bitmap.Lock();
         if (_fieldType == FieldType.Bool)
         {
@@ -111,7 +114,7 @@ public partial class MainWindow : Window
             {
                 for (int x = 0; x < _bitmap.PixelWidth; x++)
                 {
-                    var color = _colors[_iField[x / 2, y / 2]];
+                    var color = _colors[_iField[x, y]];
                     var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
                     unsafe
                     {
@@ -177,7 +180,7 @@ public partial class MainWindow : Window
         {
             return _bField[x, y] ? 1 : 0;
         }
-        var newField = new bool[1000, 1000];
+        var newField = new bool[_bField.GetLength(0), _bField.GetLength(1)];
         for (int y = startY + 1; y < endY - 1; y++)
         {
             for (int x = startX + 1; x < endX - 1; x++)
@@ -201,7 +204,7 @@ public partial class MainWindow : Window
         {
             return _iField[x, y] == 1 ? 1 : 0;
         }
-        var newField = new int[1000, 1000];
+        var newField = new int[_bField.GetLength(0), _bField.GetLength(1)];
         for (int y = startY + 1; y < endY - 1; y++)
         {
             for (int x = startX + 1; x < endX - 1; x++)
@@ -232,17 +235,34 @@ public partial class MainWindow : Window
     }
     public void NextLLR(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival, int radius = 1)
     {
-        int F(int x, int y)
+        var newField = new bool[_bField.GetLength(0), _bField.GetLength(1)];
+        var horizontalSum = new bool[_bField.GetLength(0) - radius, _bField.GetLength(1)];
+        for (int y = 0; y < horizontalSum.GetLength(1); y++)
         {
-            return _bField[x, y] ? 1 : 0;
+            var startSum = 0;
+            for (int i = 0; i < 2 * radius + 1; i++)
+            {
+                startSum += _bField[i, y] ? 1 : 0;
+            }
+            for (int x = 0; x < horizontalSum.GetLength(0) - radius; x++)
+            {
+                startSum = startSum - (_bField[x, y] ? 1 : 0) + (_bField[x + 2 * radius + 1, y] ? 1 : 0);
+            }
         }
-        var newField = new bool[1000, 1000];
-        var horizontalSum = new bool[1000 - radius, 1000];
-        for (int y = 0; y < 1000 - radius; y++)
+        var verticalSum = new bool[horizontalSum.GetLength(0), horizontalSum.GetLength(1) - radius];
+        for (int x = 0; x < verticalSum.GetLength(1); x++)
         {
-
+            var startSum = 0;
+            for (int i = 0; i < 2 * radius + 1; i++)
+            {
+                startSum += _bField[x, i] ? 1 : 0;
+            }
+            for (int y = 0; y < verticalSum.GetLength(0) - radius; y++)
+            {
+                startSum = startSum - (_bField[x, y] ? 1 : 0) + (_bField[x + 2 * radius + 1, y] ? 1 : 0);
+            }
         }
-        _bField = newField;
+        _bField = verticalSum;
     }
     public void NextLLR(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival, int generations, int radius = 1)
     {
@@ -279,8 +299,26 @@ public partial class MainWindow : Window
         }
         _iField = newField;
     }
-    public void NextCyclic(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival, int generations)
+    public void NextCyclic(int startX, int endX, int startY, int endY, BitArray threshold, int states)
     {
 
+        var newField = new int[1000, 1000];
+        for (int x = startX + 1; x < endX - 1; x++)
+        {
+            for (int y = startY + 1; y < endY - 1; y++)
+            {
+                var next = (_iField[x, y] + 1) % states;
+                int F(int X, int Y)
+                {
+                    return _iField[X, Y] == (_iField[x, y] + 1) % states ? 1 : 0;
+                }
+                var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
+                if (threshold[c])
+                {
+                    _iField[x, y] = next;
+                }
+            }
+        }
+        _iField = newField;
     }
 }
