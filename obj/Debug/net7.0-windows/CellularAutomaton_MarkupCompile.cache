@@ -1,20 +1,20 @@
 ﻿CellularAutomaton
-
+1.0.0.0
 
 winexe
 C#
 .cs
-C:\Users\Лисёнок\Documents\CellularAutomaton\obj\Debug\net7.0-windows\
+c:\Users\Лисёнок\Documents\CellularAutomaton\obj\Debug\net7.0-windows\
 CellularAutomaton
 none
 false
 TRACE;DEBUG;NET;NET7_0;NETCOREAPP
-C:\Users\Лисёнок\Documents\CellularAutomaton\App.xaml
+c:\Users\Лисёнок\Documents\CellularAutomaton\App.xaml
 11407045341
 
-1228361994
+161323433118
 1981395563138
 MainWindow.xaml;
 
-False
+True
 
