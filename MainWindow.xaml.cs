@@ -24,7 +24,7 @@ public partial class MainWindow : Window
     private Rule _rule;
     public MainWindow()
     {
-        _rule = Parser.Parse("B2/S0345/10/p=0") ?? Parser.Parse("B3/S23/p=0,1")!;
+        _rule = Parser.Parse("B2/S345/3/p=0") ?? Parser.Parse("B3/S23/p=0,1")!;
         InitializeComponent();
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
