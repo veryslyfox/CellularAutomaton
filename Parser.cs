@@ -6,7 +6,7 @@ static class Parser
     {
         try
         {
-            var rule = new Rule(new BitArray(10), new BitArray(10), 0, 1);
+            var rule = new Rule(new BitArray(512), new BitArray(512), 0, 1);
             foreach (var token in StringsToTokens(str.Split('/')))
             {
                 LoadToken(token, ref rule);
@@ -89,7 +89,7 @@ static class Parser
     }
     static BitArray GetValuesFromString(string str, bool ignoreFirstSymbol)
     {
-        var result = new BitArray(10);
+        var result = new BitArray(512);
         foreach (var symbol in str)
         {
             if (ignoreFirstSymbol)
@@ -100,36 +100,42 @@ static class Parser
             switch (symbol)
             {
                 case '0':
-                    result[0] = true;
+                    result.Or(GetArrayOfAll(0));
                     break;
                 case '1':
-                    result[1] = true;
+                    result.Or(GetArrayOfAll(1));
                     break;
                 case '2':
-                    result[2] = true;
+                    result.Or(GetArrayOfAll(2));
                     break;
                 case '3':
-                    result[3] = true;
+                    result.Or(GetArrayOfAll(3));
                     break;
                 case '4':
-                    result[4] = true;
+                    result.Or(GetArrayOfAll(4));
                     break;
                 case '5':
-                    result[5] = true;
+                    result.Or(GetArrayOfAll(5));
                     break;
                 case '6':
-                    result[6] = true;
+                    result.Or(GetArrayOfAll(6));
                     break;
                 case '7':
-                    result[7] = true;
+                    result.Or(GetArrayOfAll(7));
                     break;
                 case '8':
-                    result[8] = true;
-                    break;
-                case '9':
-                    result[9] = true;
+                    result.Or(GetArrayOfAll(8));
                     break;
             }
+        }
+        return result;
+    }
+    public static BitArray GetArrayOfAll(int value)
+    {
+        var result = new BitArray(512);
+        for (int i = 0; i < 512; i++)
+        {
+            result[i] = ((i >> 0) & 1 + (i >> 1) & 1 + (i >> 2) & 1 + +(i >> 3) & 1 + (i >> 4) & 1 + (i >> 5) & 1 + (i >> 6) & 1 + (i >> 7) & 1 + (i >> 8) & 1) == value;
         }
         return result;
     }

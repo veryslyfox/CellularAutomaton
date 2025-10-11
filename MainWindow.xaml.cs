@@ -24,7 +24,7 @@ public partial class MainWindow : Window
     private Rule _rule;
     public MainWindow()
     {
-        _rule = Parser.Parse("B2/S345/3/p=0") ?? Parser.Parse("B3/S23/p=0,1")!;
+        _rule = Parser.Parse("B34/S23/2/p=0,1") ?? Parser.Parse("B3/S23/p=0,1")!;
         InitializeComponent();
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
@@ -43,9 +43,9 @@ public partial class MainWindow : Window
                 }
                 break;
             case FieldType.Int:
-                for (int y = 0; y < 1000; y++)
+                for (int y = 0; y < 500; y++)
                 {
-                    for (int x = 0; x < 1000; x++)
+                    for (int x = 0; x < 500; x++)
                     {
                         // _iField[x, y] = _rng.Next(3);
                         _iField[x, y] = _rng.NextDouble() < p ? 1 : 0;
@@ -53,17 +53,16 @@ public partial class MainWindow : Window
                 }
                 break;
         }
-        _colors = new Color[_rule.Generations + 1];
-        for (int i = 0; i < _rule.Generations + 1; i++)
-        {
-            _colors[i] = FromRgb(0, 0, 0);
-        }
-        // _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(0, 0, 220) };
-        _iField[499, 499] = 1;
-        _iField[499, 500] = 1;
-        _iField[500, 499] = 1;
-        _iField[500, 500] = 1;
-        _colors[0] = FromRgb(220, 220, 220);
+        // _colors = new Color[_rule.Generations + 1];
+        // for (int i = 0; i < _rule.Generations + 1; i++)
+        // {
+        //     _colors[i] = FromRgb(0, 0, 0);
+        // }
+        _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(0, 0, 220) };
+        // _iField[499, 499] = 1;
+        // _iField[499, 500] = 1;
+        // _iField[500, 499] = 1;
+        // _iField[500, 500] = 1;
         _timer.Interval = TimeSpan.FromSeconds(0.00001);
         _timer.Tick += Tick;
         _timer.Start();
@@ -91,7 +90,7 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next(_rule, 0, 1000, 0, 1000);
+        Next(_rule, 0, 500, 0, 500);
         _bitmap.Lock();
         if (_fieldType == FieldType.Bool)
         {
@@ -114,7 +113,7 @@ public partial class MainWindow : Window
             {
                 for (int x = 0; x < _bitmap.PixelWidth; x++)
                 {
-                    var color = _colors[_iField[x, y]];
+                    var color = _colors[_iField[x / 2, y / 2]];
                     var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
                     unsafe
                     {
@@ -174,7 +173,7 @@ public partial class MainWindow : Window
         return Color.FromRgb((byte)(r * normalizer), ((byte)(g * normalizer)), ((byte)(b * normalizer)));
 
     }
-    public void NextLL(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival)
+    public void NextLL(int startX, int endX, int startY, int endY, Array256 birth, Array256 survival)
     {
         int F(int x, int y)
         {
@@ -185,7 +184,7 @@ public partial class MainWindow : Window
         {
             for (int x = startX + 1; x < endX - 1; x++)
             {
-                var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
+                var c = F(x - 1, y - 1) + F(x, y - 1) << 1 + F(x + 1, y - 1) << 2 + F(x - 1, y) << 3 + F(x + 1, y) << 4 + F(x - 1, y + 1) << 5 + F(x, y + 1) << 6 + F(x + 1, y + 1) << 7;
                 if (_bField[x, y] & survival[c])
                 {
                     newField[x, y] = true;

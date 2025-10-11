@@ -1,7 +1,7 @@
 global using System.Collections;
 public class Rule
 {
-    public Rule(BitArray birth, BitArray survival, double startDensity, int generations)
+    public Rule(Array256 birth, Array256 survival, double startDensity, int generations)
     {
         Birth = birth;
         Survival = survival;
@@ -9,8 +9,8 @@ public class Rule
         Generations = generations;
     }
 
-    public BitArray Birth { get; set; }
-    public BitArray Survival { get; set; }
+    public Array256 Birth { get; set; }
+    public Array256 Survival { get; set; }
     public double StartDensity { get; set; }
     public int Generations { get; set; }
 }
