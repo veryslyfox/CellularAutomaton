@@ -8,7 +8,6 @@ public class Rule
         StartDensity = startDensity;
         Generations = generations;
     }
-
     public Array256 Birth { get; set; }
     public Array256 Survival { get; set; }
     public double StartDensity { get; set; }

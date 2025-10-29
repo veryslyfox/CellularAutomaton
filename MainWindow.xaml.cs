@@ -22,9 +22,16 @@ public partial class MainWindow : Window
     private Color[] _colors;
     private string? _error;
     private Rule _rule;
+    Array256 rng_b;
+    Array256 rng_s;
+
     public MainWindow()
     {
-        _rule = Parser.Parse("B34/S23/2/p=0,1") ?? Parser.Parse("B3/S23/p=0,1")!;
+        rng_b = RandomArray256(0.1);
+        rng_s = RandomArray256(0.1);
+        rng_b[0] = false;
+        rng_s[0] = false;
+        _rule = Parser.Parse("B3/S23/p=0,1") ?? Parser.Parse("B3/S23/p=0,1")!;
         InitializeComponent();
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
@@ -87,6 +94,15 @@ public partial class MainWindow : Window
     {
         var coeff = Math.Sqrt(point.X * point.X + point.Y * point.Y) / dist;
         return new Point(point.X * dist, point.Y * dist);
+    }
+    private Array256 RandomArray256(double p)
+    {
+        var result = new Array256(new BitArray(256));
+        for (int i = 0; i < 256; i++)
+        {
+            result[i] = _rng.NextDouble() < p;
+        }
+        return result;
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
@@ -184,7 +200,7 @@ public partial class MainWindow : Window
         {
             for (int x = startX + 1; x < endX - 1; x++)
             {
-                var c = F(x - 1, y - 1) + F(x, y - 1) << 1 + F(x + 1, y - 1) << 2 + F(x - 1, y) << 3 + F(x + 1, y) << 4 + F(x - 1, y + 1) << 5 + F(x, y + 1) << 6 + F(x + 1, y + 1) << 7;
+                var c = (F(x - 1, y - 1)) + (F(x, y - 1) << 1) + (F(x + 1, y - 1) << 2) + (F(x - 1, y) << 3) + (F(x + 1, y) << 4) + (F(x - 1, y + 1) << 5) + (F(x, y + 1) << 6) + (F(x + 1, y + 1) << 7);
                 if (_bField[x, y] & survival[c])
                 {
                     newField[x, y] = true;
@@ -197,7 +213,7 @@ public partial class MainWindow : Window
         }
         _bField = newField;
     }
-    public void NextLL(int startX, int endX, int startY, int endY, BitArray birth, BitArray survival, int generations)
+    public void NextLL(int startX, int endX, int startY, int endY, Array256 birth, Array256 survival, int generations)
     {
         int F(int x, int y)
         {

@@ -6,7 +6,7 @@ static class Parser
     {
         try
         {
-            var rule = new Rule(new BitArray(512), new BitArray(512), 0, 1);
+            var rule = new Rule(new Array256(new BitArray(256)), new Array256(new BitArray(256)), 0, 1);
             foreach (var token in StringsToTokens(str.Split('/')))
             {
                 LoadToken(token, ref rule);
@@ -87,9 +87,42 @@ static class Parser
                 break;
         }
     }
-    static BitArray GetValuesFromString(string str, bool ignoreFirstSymbol)
+     static void LoadTokenTest(Token token, ref Rule rule)
     {
-        var result = new BitArray(512);
+        switch (token.Type)
+        {
+             case TokenType.Birth:
+                rule.Birth = GetValuesFromString(token.Content, false);
+                break;
+            case TokenType.Survival:
+                rule.Survival = GetValuesFromString(token.Content, false);
+                break;
+            case TokenType.Density:
+                if (double.TryParse(token.Content.Trim("pd= ".ToCharArray()), out double d))
+                {
+                    rule.StartDensity = d;
+                }
+                else
+                {
+                    throw new IncorrectRulestringException($"Density is not a number: {token.Content.Trim("pd= ".ToCharArray())}");
+                }
+                break;
+            case TokenType.Generations:
+                if (int.TryParse(token.Content.Trim('G'), out int g))
+                {
+                    rule.Generations = g;
+                }
+                else
+                {
+                    throw new IncorrectRulestringException($"Generations count is not a number: {token.Content.Trim('G')}");
+                }
+                break;
+        }
+    }
+
+    static Array256 GetValuesFromString(string str, bool ignoreFirstSymbol)
+    {
+        var result = new BitArray(256);
         foreach (var symbol in str)
         {
             if (ignoreFirstSymbol)
@@ -128,14 +161,14 @@ static class Parser
                     break;
             }
         }
-        return result;
+        return new(result);
     }
     public static BitArray GetArrayOfAll(int value)
     {
-        var result = new BitArray(512);
-        for (int i = 0; i < 512; i++)
+        var result = new BitArray(256);
+        for (int i = 0; i < 256; i++)
         {
-            result[i] = ((i >> 0) & 1 + (i >> 1) & 1 + (i >> 2) & 1 + +(i >> 3) & 1 + (i >> 4) & 1 + (i >> 5) & 1 + (i >> 6) & 1 + (i >> 7) & 1 + (i >> 8) & 1) == value;
+            result[i] = ((i >> 0) & 1 + (i >> 1) & 1 + (i >> 2) & 1 + (i >> 3) & 1 + (i >> 4) & 1 + (i >> 5) & 1 + (i >> 6) & 1 + (i >> 7) & 1 + (i >> 8) & 1) == value;
         }
         return result;
     }

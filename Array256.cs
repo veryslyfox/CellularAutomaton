@@ -8,7 +8,11 @@ public class Array256
         }
         Array = array;
     }
-    public bool this[int index] => Array[index];
+    public bool this[int index]
+    {
+        get => Array[index];
+        set => Array[index] = value;
+    }
     public BitArray Array { get; }
 }
 // # 0 1 2
