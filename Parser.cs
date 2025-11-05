@@ -87,39 +87,6 @@ static class Parser
                 break;
         }
     }
-     static void LoadTokenTest(Token token, ref Rule rule)
-    {
-        switch (token.Type)
-        {
-             case TokenType.Birth:
-                rule.Birth = GetValuesFromString(token.Content, false);
-                break;
-            case TokenType.Survival:
-                rule.Survival = GetValuesFromString(token.Content, false);
-                break;
-            case TokenType.Density:
-                if (double.TryParse(token.Content.Trim("pd= ".ToCharArray()), out double d))
-                {
-                    rule.StartDensity = d;
-                }
-                else
-                {
-                    throw new IncorrectRulestringException($"Density is not a number: {token.Content.Trim("pd= ".ToCharArray())}");
-                }
-                break;
-            case TokenType.Generations:
-                if (int.TryParse(token.Content.Trim('G'), out int g))
-                {
-                    rule.Generations = g;
-                }
-                else
-                {
-                    throw new IncorrectRulestringException($"Generations count is not a number: {token.Content.Trim('G')}");
-                }
-                break;
-        }
-    }
-
     static Array256 GetValuesFromString(string str, bool ignoreFirstSymbol)
     {
         var result = new BitArray(256);
@@ -133,31 +100,31 @@ static class Parser
             switch (symbol)
             {
                 case '0':
-                    result.Or(GetArrayOfAll(0));
+                    result = result.Or(GetArrayOfAll(0));
                     break;
                 case '1':
-                    result.Or(GetArrayOfAll(1));
+                    result = result.Or(GetArrayOfAll(1));
                     break;
                 case '2':
-                    result.Or(GetArrayOfAll(2));
+                    result = result.Or(GetArrayOfAll(2));
                     break;
                 case '3':
-                    result.Or(GetArrayOfAll(3));
+                    result = result.Or(GetArrayOfAll(3));
                     break;
                 case '4':
-                    result.Or(GetArrayOfAll(4));
+                    result = result.Or(GetArrayOfAll(4));
                     break;
                 case '5':
-                    result.Or(GetArrayOfAll(5));
+                    result = result.Or(GetArrayOfAll(5));
                     break;
                 case '6':
-                    result.Or(GetArrayOfAll(6));
+                    result = result.Or(GetArrayOfAll(6));
                     break;
                 case '7':
-                    result.Or(GetArrayOfAll(7));
+                    result = result.Or(GetArrayOfAll(7));
                     break;
                 case '8':
-                    result.Or(GetArrayOfAll(8));
+                    result = result.Or(GetArrayOfAll(8));
                     break;
             }
         }
@@ -168,7 +135,7 @@ static class Parser
         var result = new BitArray(256);
         for (int i = 0; i < 256; i++)
         {
-            result[i] = ((i >> 0) & 1 + (i >> 1) & 1 + (i >> 2) & 1 + (i >> 3) & 1 + (i >> 4) & 1 + (i >> 5) & 1 + (i >> 6) & 1 + (i >> 7) & 1 + (i >> 8) & 1) == value;
+            result[i] = (((i >> 0) & 1) + ((i >> 1) & 1) + ((i >> 2) & 1) + ((i >> 3) & 1) + ((i >> 4) & 1) + ((i >> 5) & 1) + ((i >> 6) & 1) + ((i >> 7) & 1) + ((i >> 8) & 1)) == value;
         }
         return result;
     }

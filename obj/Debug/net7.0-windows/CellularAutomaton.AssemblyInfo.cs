@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CellularAutomaton")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f2e7dcca4ceea3e08aee0013f9f2d57e142faf98")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dad2e02b3f437f03ba31a8ba23eff768919cf130")]
 [assembly: System.Reflection.AssemblyProductAttribute("CellularAutomaton")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CellularAutomaton")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

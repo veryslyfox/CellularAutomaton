@@ -24,14 +24,13 @@ public partial class MainWindow : Window
     private Rule _rule;
     Array256 rng_b;
     Array256 rng_s;
-
     public MainWindow()
     {
         rng_b = RandomArray256(0.1);
         rng_s = RandomArray256(0.1);
         rng_b[0] = false;
         rng_s[0] = false;
-        _rule = Parser.Parse("B3/S23/p=0,1") ?? Parser.Parse("B3/S23/p=0,1")!;
+        _rule = Parser.Parse("B2/S2/50/p=0,3") ?? Parser.Parse("B3/S23/p=0,1")!;
         InitializeComponent();
         _bitmap = new((int)image.Width, (int)image.Height, 96, 100, PixelFormats.Bgr32, null);
         image.Source = _bitmap;
@@ -60,12 +59,13 @@ public partial class MainWindow : Window
                 }
                 break;
         }
-        // _colors = new Color[_rule.Generations + 1];
-        // for (int i = 0; i < _rule.Generations + 1; i++)
-        // {
-        //     _colors[i] = FromRgb(0, 0, 0);
-        // }
-        _colors = new Color[] { FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(0, 0, 220) };
+        _colors = new Color[_rule.Generations + 1];
+        for (int i = 0; i < _rule.Generations + 1; i++)
+        {
+            _colors[i] = FromRgb(i * 220 / _rule.Generations, i * 220 / _rule.Generations, i * 220 / _rule.Generations);
+        }
+        _colors[0] = FromRgb(220, 220, 220);
+        // _colors = new Color[] {FromRgb(220, 220, 220), FromRgb(0, 0, 0), FromRgb(0, 0, 220), FromRgb(110, 0, 0)};
         // _iField[499, 499] = 1;
         // _iField[499, 500] = 1;
         // _iField[500, 499] = 1;
@@ -106,7 +106,7 @@ public partial class MainWindow : Window
     }
     private unsafe void Tick(object? sender, EventArgs e)
     {
-        Next(_rule, 0, 500, 0, 500);
+        Next(_rule, 0, 333, 0, 333);
         _bitmap.Lock();
         if (_fieldType == FieldType.Bool)
         {
@@ -114,7 +114,7 @@ public partial class MainWindow : Window
             {
                 for (int x = 0; x < _bitmap.PixelWidth; x++)
                 {
-                    var color = _colors[_bField[x / 2, y / 2] ? 1 : 0];
+                    var color = _colors[_bField[x / 3, y / 3] ? 1 : 0];
                     var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
                     unsafe
                     {
@@ -129,7 +129,7 @@ public partial class MainWindow : Window
             {
                 for (int x = 0; x < _bitmap.PixelWidth; x++)
                 {
-                    var color = _colors[_iField[x / 2, y / 2]];
+                    var color = _colors[_iField[x / 3, y / 3]];
                     var ptr = _bitmap.BackBuffer + x * 4 + _bitmap.BackBufferStride * y;
                     unsafe
                     {
@@ -224,7 +224,42 @@ public partial class MainWindow : Window
         {
             for (int x = startX + 1; x < endX - 1; x++)
             {
-                var c = F(x - 1, y - 1) + F(x, y - 1) + F(x + 1, y - 1) + F(x - 1, y) + F(x + 1, y) + F(x - 1, y + 1) + F(x, y + 1) + F(x + 1, y + 1);
+                var c = (F(x - 1, y - 1)) + (F(x, y - 1) << 1) + (F(x + 1, y - 1) << 2) + (F(x - 1, y) << 3) + (F(x + 1, y) << 4) + (F(x - 1, y + 1) << 5) + (F(x, y + 1) << 6) + (F(x + 1, y + 1) << 7);
+                if ((_iField[x, y] >= generations) || ((_iField[x, y] == 0 && !birth[c])))
+                {
+                    newField[x, y] = 0;
+                    continue;
+                }
+                if ((birth[c] && _iField[x, y] == 0) || (survival[c] && _iField[x, y] == 1))
+                {
+                    newField[x, y] = 1;
+                    continue;
+                }
+                if (!survival[c] && _iField[x, y] == 1)
+                {
+                    newField[x, y] = 2;
+                    continue;
+                }
+                if (_iField[x, y] > 1)
+                {
+                    newField[x, y] = _iField[x, y] + 1;
+                }
+            }
+        }
+        _iField = newField;
+    }
+    public void NextLLG(int startX, int endX, int startY, int endY, Array256 birth, Array256 survival, int generations)
+    {
+        int F(int x, int y)
+        {
+            return _iField[x, y] == 1 ? 1 : 0;
+        }
+        var newField = new int[_iField.GetLength(0), _iField.GetLength(1)];
+        for (int y = startY + 1; y < endY - 1; y++)
+        {
+            for (int x = startX + 1; x < endX - 1; x++)
+            {
+                var c = (F(x - 1, y - 1)) + (F(x, y - 1) << 1) + (F(x + 1, y - 1) << 2) + (F(x - 1, y) << 3) + (F(x + 1, y) << 4) + (F(x - 1, y + 1) << 5) + (F(x, y + 1) << 6) + (F(x + 1, y + 1) << 7);
                 if ((_iField[x, y] >= generations) || ((_iField[x, y] == 0 && !birth[c])))
                 {
                     newField[x, y] = 0;
